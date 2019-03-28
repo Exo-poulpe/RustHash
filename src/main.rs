@@ -115,7 +115,7 @@ fn main() {
                 }
 
                 if finded {
-                    println!("Hash find : \"{}\"",valueHash.clone() );
+                    println!("Hash found : \"{}\"",valueHash.clone() );
                     break;
                 } 
             }
@@ -126,8 +126,8 @@ fn main() {
             if !finded {
                 println!("Hash not found");
             }
-
-            println!("Time : {:?}",now.elapsed().unwrap());
+            let time : f32 = now.elapsed().unwrap().as_millis() as f32 / 1000 as f32;
+            println!("Time : {:.2}s",time);
 
             
         } else {
@@ -170,7 +170,7 @@ fn HashMD5(text :String) -> String {
 
 fn Options<'a>() -> clap::App<'a,'a> {
     let result = App::new("RustHash")
-                            .version("0.0.0.1")
+                            .version("0.0.1.3")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
