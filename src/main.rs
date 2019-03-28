@@ -12,6 +12,8 @@ use std::thread;
 
 use clap::{Arg, App};
 use md5::{Md5, Digest};
+use sha1::Sha1;
+use sha2::{Sha256};
 
 static DEFAULT_BENCH_VALUE : f64 = 1_000_000.;
 static KB : f64 = 1_000.;
@@ -35,6 +37,8 @@ fn main() {
         } else {
             println!("Methods use  \t: {}", StringMethods(1));
         }
+        println!("Hash number : {}", DEFAULT_BENCH_VALUE );
+        println!("===================================");
         let start = SystemTime::now();
 
         let T = thread::spawn(move||{
@@ -111,7 +115,7 @@ fn main() {
 
                 
                 if matches.is_present("VERBOSE") {
-                    println!("{}  \t:\t  {}",l.clone(),HASH);
+                    println!("{}    \t: {}",l.clone(),HASH);
                 }
 
                 if finded {
@@ -139,9 +143,12 @@ fn main() {
 
 fn SwitchHashMethods(text : String, method : i32) -> String {
     let mut result = String::new();
-    if method == 1 {
-        result = HashMD5(text);
-    } 
+    match method {
+        1 => result = HashMD5(text),
+        2 => result = HashSHA1(text),
+        3 => result = HashSHA256(text),
+        _ => result = HashMD5(text),
+    }
     return result;
 }
 
@@ -167,10 +174,30 @@ fn HashMD5(text :String) -> String {
 }
 
 
+fn HashSHA1(text : String) -> String {
+    let mut hasher = Sha1::new();
+    hasher.input(text);
+    let tmp = hasher.result();
+    let result = format!("{:x}",tmp);
+    return result;
+}
+
+fn HashSHA256(text : String) -> String {
+    let mut hasher = Sha256::new();
+    hasher.input(text);
+    let tmp = hasher.result();
+    let result = format!("{:x}",tmp);
+    return result;
+}
+
+
+
+
+
 
 fn Options<'a>() -> clap::App<'a,'a> {
     let result = App::new("RustHash")
-                            .version("0.0.1.3")
+                            .version("0.0.1.5")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -183,7 +210,7 @@ fn Options<'a>() -> clap::App<'a,'a> {
                                 .short("m")
                                 .required(false)
                                 .takes_value(true)
-                                .help("Set methods for hashing : \n1 \t : MD5\n2 \t: SHA-1\n3 \t: SHA-256"))
+                                .help("Set methods for hashing : \n1) \t: MD5\n2) \t: SHA-1\n3) \t: SHA-256\n4) \t: SHA-512 (Not implemented)"))
                             .arg(Arg::with_name("TARGET")
                                 .short("t")
                                 .long("target")

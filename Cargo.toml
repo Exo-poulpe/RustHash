@@ -7,3 +7,5 @@ edition = "2018"
 [dependencies]
 clap="*"
 md-5="*"
+sha-1="*"
+sha2="*"
