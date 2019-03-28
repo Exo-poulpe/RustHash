@@ -10,7 +10,7 @@ Download the Rust source and compile then.
 
 ### Usage/Help ###
 ```
-RustHash 0.0.2.1
+RustHash 0.0.2.3
 Exo-poulpe
 Rust hash test hash from wordlist
 
@@ -26,13 +26,14 @@ FLAGS:
     -V, --version          Prints version information
 
 OPTIONS:
-    -f, --file <FILE>        Set wordlist to use
-    -m <METHODS>             Set methods for hashing :
-                             1)         : MD5
-                             2)         : SHA-1
-                             3)         : SHA-256
-                             4)         : SHA-512
-    -t, --target <TARGET>    Set hash target for test
+        --detect-hash <DETECT>    Check if hash is valid
+    -f, --file <FILE>             Set wordlist to use
+    -m <METHODS>                  Set methods for hashing :
+                                  1)    : MD5
+                                  2)    : SHA-1
+                                  3)    : SHA-256
+                                  4)    : SHA-512
+    -t, --target <TARGET>         Set hash target for test
 ```
 ### Exemple ###
 For exemple : s

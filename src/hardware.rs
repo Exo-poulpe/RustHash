@@ -2,10 +2,7 @@ extern crate sys_info;  // Memory info + os info
 extern crate raw_cpuid; // Cpu info
 
 use std::convert::*;
-use std::mem;
 use std::string::String;
-
-use sys_info::*;
 use raw_cpuid::CpuId;
 
 

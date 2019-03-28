@@ -1,13 +1,13 @@
 #![crate_type = "bin"]
 
 extern crate clap;
-extern crate time;
 mod hardware;
 
 use std::convert;
 use std::fs::*;
 use std::io::BufReader;
 use std::io::*;
+use std::time::SystemTime;
 use std::thread;
 
 use clap::{App, Arg};
@@ -17,6 +17,7 @@ use sha2::{Sha256, Sha512};
 use termcolor::*;
 
 static DEFAULT_BENCH_VALUE: f64 = 1_000_000.;
+static DEFAULT_SECOND_DIV : f64 = 1_000.;
 static KB: f64 = 1_000.;
 static MB: f64 = 1_000_000.;
 static GB: f64 = 1_000_000_000.;
@@ -30,10 +31,21 @@ fn main() {
     let mut valueHash: String = String::new();
     let mut finded = false;
     let mut HASH = String::new();
+
+    // Options hardware
     if matches.is_present("HARDWARE") {
         println!("{}", GetHardInfo());
         std::process::exit(0);
     }
+
+    // Options detect hash
+    if matches.is_present("DETECT") {
+        println!("Detected  \t: {}", CheckHashValidity(matches.value_of("DETECT").unwrap().to_string()));
+        std::process::exit(0);
+    }
+
+
+    // Options BENCH
     if matches.is_present("BENCH") {
         if matches.is_present("METHODS") {
             println!(
@@ -45,8 +57,7 @@ fn main() {
         }
         println!("Hash number \t: {}", DEFAULT_BENCH_VALUE);
         println!("===================================");
-        let start = String::from(time::now().rfc822().to_string());
-        let startTime = time::now().tm_nsec as f64 / 1000 as f64;
+        let start = SystemTime::now();
 
         let T = thread::spawn(move || {
             for i in 0..DEFAULT_BENCH_VALUE as u64 {
@@ -66,12 +77,11 @@ fn main() {
 
         T.join().unwrap();
 
-        let stop = String::from(time::now().rfc822().to_string());
-        println!("Start : {}", start );
-        println!("Stop  : {}", stop );
+        println!("Time elapsed \t: {:.2}s", start.elapsed().unwrap().as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
 
+        let diff = start.elapsed().unwrap().as_millis() as f64;
         // Calc benchmark
-        let timePass = startTime as f64 / 1000 as f64;
+        let timePass = diff / DEFAULT_SECOND_DIV as f64;
         if timePass > 0.0 {
             let mut val = DEFAULT_BENCH_VALUE / timePass as f64;
             let mut result = String::new();
@@ -88,11 +98,12 @@ fn main() {
             println!("Benchmark \t: {}", result);
         }
     } else {
+        // If program start normaly
         if matches.is_present("FILE")
             && matches.is_present("TARGET")
             && matches.is_present("METHODS")
         {
-            let start = String::from(time::now().rfc822().to_string());
+            let start = SystemTime::now();
             filename = matches.value_of("FILE").unwrap().to_string();
             target = matches.value_of("TARGET").unwrap().to_string();
             if matches.is_present("VERBOSE") {
@@ -149,7 +160,7 @@ fn main() {
             }
 
             if matches.is_present("COUNT") {
-                println!("Count : {}", count);
+                println!("Count \t\t: {}", count);
             }
             if !finded {
                 let mut stdout = StandardStream::stdout(ColorChoice::Always);
@@ -158,9 +169,7 @@ fn main() {
                 stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
                 //println!("Hash not found");
             }
-            let stop = String::from(time::now().rfc822().to_string());
-            println!("Started : {}", start );
-            println!("Stopped : {}", stop );
+            println!("Time elapsed : {:.2}s", start.elapsed().unwrap().as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
         } else {
             app.print_help();
         }
@@ -223,6 +232,19 @@ fn HashSHA512(text: String) -> String {
     return result;
 }
 
+fn CheckHashValidity(hash : String) -> String {
+    let mut result = String::from("MD5");
+    match hash.len() {
+        32 => result = String::from("MD5"),
+        40 => result = String::from("SHA-1"),
+        64 => result = String::from("SHA-256"),
+        128 => result = String::from("SHA-512"),
+        _ => result = String::from("Detect failed"),
+    }
+
+    return result;
+}
+
 fn GetCpuInfo() -> String {
     let info: hardware::SysInfo = hardware::SysInfo::new();
     return info.cpu.brand;
@@ -250,7 +272,7 @@ fn GetHardInfo() -> String {
 
 fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.2.1")
+                            .version("0.0.2.3")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -270,6 +292,11 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                                 .required(false)
                                 .takes_value(true)
                                 .help("Set hash target for test"))
+                            .arg(Arg::with_name("DETECT")
+                                .long("detect-hash")
+                                .required(false)
+                                .takes_value(true)
+                                .help("Check if hash is valid"))
                             .arg(Arg::with_name("VERBOSE")
                                 .short("v")
                                 .long("verbose")
