@@ -13,7 +13,7 @@ use std::thread;
 use clap::{Arg, App};
 use md5::{Md5, Digest};
 
-static DEFAULT_BENCH_VALUE : f64 = 2_000_000.;
+static DEFAULT_BENCH_VALUE : f64 = 1_000_000.;
 static KB : f64 = 1_000.;
 static MB : f64 = 1_000_000.;
 static GB : f64 = 1_000_000_000.;
