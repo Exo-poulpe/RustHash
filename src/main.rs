@@ -6,14 +6,18 @@ extern crate clap;
 use std::fs::*;
 use std::io::*;
 use std::io::BufReader;
-use std::str;
-use std::time::{Duration, SystemTime};
-use std::io::prelude::*;
+use std::time::{SystemTime};
+use std::convert;
+use std::thread;
 
-use clap::{Arg, App, SubCommand};
+use clap::{Arg, App};
 use md5::{Md5, Digest};
 
-static FILENAME : &str = "";
+static DEFAULT_BENCH_VALUE : f64 = 2_000_000.;
+static KB : f64 = 1_000.;
+static MB : f64 = 1_000_000.;
+static GB : f64 = 1_000_000_000.;
+static TB : f64 = 1_000_000_000_000.;
 
 
 fn main() {
@@ -23,8 +27,54 @@ fn main() {
     let mut target : String;
     let mut valueHash : String = String::new();
     let mut finded = false;
+    let mut HASH = String::new();
     if matches.is_present("BENCH") {
         
+        if matches.is_present("METHODS") {
+            println!("Methods use  \t: {}", StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap()));
+        } else {
+            println!("Methods use  \t: {}", StringMethods(1));
+        }
+        let start = SystemTime::now();
+
+        let T = thread::spawn(move||{
+            for i in 0..DEFAULT_BENCH_VALUE as u64 {
+                
+                if matches.is_present("METHODS") {
+                    HASH = SwitchHashMethods(i.to_string(),matches.value_of("METHODS").unwrap().parse::<i32>().unwrap());
+                } else {
+                    HASH = HashMD5(i.to_string());
+                } 
+                if matches.is_present("VERBOSE") {
+                    println!("{} : {}",i,HASH );
+                }
+            }   
+        
+        });
+
+        T.join().unwrap();
+        
+
+        println!("Time elapsed \t: {}s for {} hash",start.elapsed().unwrap().as_secs(),DEFAULT_BENCH_VALUE);
+        let timePass = start.elapsed().unwrap().as_secs();
+        if timePass > 0 {
+            let mut val = DEFAULT_BENCH_VALUE / timePass as f64;
+            let mut result = String::new();
+            if val > KB && val < MB {
+                let tmp = val / KB;
+                result =  format!("{:.3} KH/s",tmp);
+            } else if val > MB && val < GB {
+                let tmp = val / MB;
+                result =  format!("{:.3} MH/s",tmp);        
+            } else if val > GB && val < TB {
+                let tmp = val / GB;
+                result =  format!("{:.3} GH/s",tmp);
+            }
+            println!("Benchmark \t: {}", result);
+        }
+        
+        
+
     } else {
         if matches.is_present("FILE") && matches.is_present("TARGET") && matches.is_present("METHODS") {
             let now = SystemTime::now();
@@ -32,11 +82,11 @@ fn main() {
             target = matches.value_of("TARGET").unwrap().to_string();
             println!("wordlist use \t: {}",filename.clone() );
             println!("hash to find \t: {}",target.clone());
+            println!("Methods use  \t: {}", StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap()));
             println!("===================================");
             let f = File::open(filename).unwrap();
             let mut count : u32 = 0;
             let mut lines = BufReader::new(f).lines();
-            let mut HASH = String::new();
             for line in lines {
                 let mut l = String::new();
                 match line {
@@ -67,11 +117,14 @@ fn main() {
                 if finded {
                     println!("Hash find : \"{}\"",valueHash.clone() );
                     break;
-                }
+                } 
             }
 
             if matches.is_present("COUNT") {
                     println!("Count : {}",count );
+            }
+            if !finded {
+                println!("Hash not found");
             }
 
             println!("Time : {:?}",now.elapsed().unwrap());
@@ -89,6 +142,18 @@ fn SwitchHashMethods(text : String, method : i32) -> String {
     if method == 1 {
         result = HashMD5(text);
     } 
+    return result;
+}
+
+fn StringMethods(method : i32) -> String {
+    let mut result = String::new();
+    if method == 1 {
+        result = String::from("MD5");
+    } else if method == 2 {
+        result = String::from("SHA-1");
+    } else if method == 3 {
+        result = String::from("SHA-256");
+    }
     return result;
 }
 
