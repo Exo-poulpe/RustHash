@@ -12,6 +12,7 @@ use std::thread;
 
 use clap::{App, Arg};
 use md5::{Digest, Md5};
+use md4::Md4;
 use sha1::Sha1;
 use sha2::{Sha256, Sha512};
 use termcolor::*;
@@ -180,9 +181,10 @@ fn SwitchHashMethods(text: String, method: i32) -> String {
     let mut result = String::new();
     match method {
         1 => result = HashMD5(text),
-        2 => result = HashSHA1(text),
-        3 => result = HashSHA256(text),
-        4 => result = HashSHA512(text),
+        2 => result = HashMD4(text),
+        3 => result = HashSHA1(text),
+        4 => result = HashSHA256(text),
+        5 => result = HashSHA512(text),
         _ => result = HashMD5(text),
     }
     return result;
@@ -192,9 +194,10 @@ fn StringMethods(method: i32) -> String {
     let mut result = String::new();
     match method {
         1 => result = String::from("MD5"),
-        2 => result = String::from("SHA-1"),
-        3 => result = String::from("SHA-256"),
-        4 => result = String::from("SHA-512"),
+        2 => result = String::from("MD4"),
+        3 => result = String::from("SHA-1"),
+        4 => result = String::from("SHA-256"),
+        5 => result = String::from("SHA-512"),
         _ => result = String::from("MD5"),
     }
     return result;
@@ -232,10 +235,18 @@ fn HashSHA512(text: String) -> String {
     return result;
 }
 
+fn HashMD4(text : String) -> String {
+    let mut hasher = Md4::new();
+    hasher.input(text);
+    let tmp = hasher.result();
+    let result = format!("{:x}", tmp);
+    return result;
+}
+
 fn CheckHashValidity(hash : String) -> String {
     let mut result = String::from("MD5");
     match hash.len() {
-        32 => result = String::from("MD5"),
+        32 => result = String::from("MD5 / MD4"),
         40 => result = String::from("SHA-1"),
         64 => result = String::from("SHA-256"),
         128 => result = String::from("SHA-512"),
@@ -272,7 +283,7 @@ fn GetHardInfo() -> String {
 
 fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.2.3")
+                            .version("0.0.2.5")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -285,7 +296,7 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                                 .short("m")
                                 .required(false)
                                 .takes_value(true)
-                                .help("Set methods for hashing : \n1) \t: MD5\n2) \t: SHA-1\n3) \t: SHA-256\n4) \t: SHA-512"))
+                                .help("Set methods for hashing : \n1) \t: MD5\n2) \t: MD4\n3) \t: SHA-1\n4) \t: SHA-256\n5) \t: SHA-512"))
                             .arg(Arg::with_name("TARGET")
                                 .short("t")
                                 .long("target")

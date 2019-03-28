@@ -10,7 +10,7 @@ Download the Rust source and compile then.
 
 ### Usage/Help ###
 ```
-RustHash 0.0.2.3
+RustHash 0.0.2.5
 Exo-poulpe
 Rust hash test hash from wordlist
 
@@ -30,9 +30,10 @@ OPTIONS:
     -f, --file <FILE>             Set wordlist to use
     -m <METHODS>                  Set methods for hashing :
                                   1)    : MD5
-                                  2)    : SHA-1
-                                  3)    : SHA-256
-                                  4)    : SHA-512
+                                  2)    : MD4
+                                  3)    : SHA-1
+                                  4)    : SHA-256
+                                  5)    : SHA-512
     -t, --target <TARGET>         Set hash target for test
 ```
 ### Exemple ###
@@ -52,4 +53,11 @@ Hash find : "example"
 Time : 1.34s
 ```
 ### Benchmark ###
-For benchmark RustHash test 1'000'000 MD5 hash in a duration
+```
+Methods use     : MD5
+Hash number     : 1000000
+===================================
+Time elapsed    : 24.15s
+Benchmark       : 41.415 KH/s
+```
+For benchmark RustHash test 1'000'000 MD5 hash (default)
