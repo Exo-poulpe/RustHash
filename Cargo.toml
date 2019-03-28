@@ -1,6 +1,6 @@
 [package]
 name = "RustHash"
-version = "0.1.0"
+version = "0.0.2"
 authors = ["Exo-poulpe <exo.poulpe@outlook.com>"]
 edition = "2018"
 
@@ -11,3 +11,5 @@ sha-1="*"
 sha2="*"
 raw-cpuid="*"
 sys-info="*"
+time="*"
+termcolor="*"

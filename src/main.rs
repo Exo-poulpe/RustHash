@@ -1,216 +1,245 @@
 #![crate_type = "bin"]
 
 extern crate clap;
+extern crate time;
 mod hardware;
 
-
-use std::fs::*;
-use std::io::*;
-use std::io::BufReader;
-use std::time::{SystemTime};
 use std::convert;
+use std::fs::*;
+use std::io::BufReader;
+use std::io::*;
 use std::thread;
 
-use clap::{Arg, App};
-use md5::{Md5, Digest};
+use clap::{App, Arg};
+use md5::{Digest, Md5};
 use sha1::Sha1;
-use sha2::{Sha256};
+use sha2::{Sha256, Sha512};
+use termcolor::*;
 
-static DEFAULT_BENCH_VALUE : f64 = 1_000_000.;
-static KB : f64 = 1_000.;
-static MB : f64 = 1_000_000.;
-static GB : f64 = 1_000_000_000.;
-static TB : f64 = 1_000_000_000_000.;
-
+static DEFAULT_BENCH_VALUE: f64 = 1_000_000.;
+static KB: f64 = 1_000.;
+static MB: f64 = 1_000_000.;
+static GB: f64 = 1_000_000_000.;
+static TB: f64 = 1_000_000_000_000.;
 
 fn main() {
     let mut app = Options();
     let matches = app.clone().get_matches();
-    let mut filename : String;
-    let mut target : String;
-    let mut valueHash : String = String::new();
+    let mut filename: String;
+    let mut target: String;
+    let mut valueHash: String = String::new();
     let mut finded = false;
     let mut HASH = String::new();
     if matches.is_present("HARDWARE") {
-        println!("{}", GetHardInfo() );
+        println!("{}", GetHardInfo());
         std::process::exit(0);
     }
     if matches.is_present("BENCH") {
-        
         if matches.is_present("METHODS") {
-            println!("Methods use  \t: {}", StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap()));
+            println!(
+                "Methods use  \t: {}",
+                StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap())
+            );
         } else {
             println!("Methods use  \t: {}", StringMethods(1));
         }
-        println!("Hash number : {}", DEFAULT_BENCH_VALUE );
+        println!("Hash number \t: {}", DEFAULT_BENCH_VALUE);
         println!("===================================");
-        let start = SystemTime::now();
+        let start = String::from(time::now().rfc822().to_string());
+        let startTime = time::now().tm_nsec as f64 / 1000 as f64;
 
-        let T = thread::spawn(move||{
+        let T = thread::spawn(move || {
             for i in 0..DEFAULT_BENCH_VALUE as u64 {
-                
                 if matches.is_present("METHODS") {
-                    HASH = SwitchHashMethods(i.to_string(),matches.value_of("METHODS").unwrap().parse::<i32>().unwrap());
+                    HASH = SwitchHashMethods(
+                        i.to_string(),
+                        matches.value_of("METHODS").unwrap().parse::<i32>().unwrap(),
+                    );
                 } else {
                     HASH = HashMD5(i.to_string());
-                } 
-                if matches.is_present("VERBOSE") {
-                    println!("{} : {}",i,HASH );
                 }
-            }   
-        
+                if matches.is_present("VERBOSE") {
+                    println!("{} : {}", i, HASH);
+                }
+            }
         });
 
         T.join().unwrap();
-        
 
-        println!("Time elapsed \t: {}s for {} hash",start.elapsed().unwrap().as_secs(),DEFAULT_BENCH_VALUE);
-        let timePass = start.elapsed().unwrap().as_secs();
-        if timePass > 0 {
+        let stop = String::from(time::now().rfc822().to_string());
+        println!("Start : {}", start );
+        println!("Stop  : {}", stop );
+
+        // Calc benchmark
+        let timePass = startTime as f64 / 1000 as f64;
+        if timePass > 0.0 {
             let mut val = DEFAULT_BENCH_VALUE / timePass as f64;
             let mut result = String::new();
             if val > KB && val < MB {
                 let tmp = val / KB;
-                result =  format!("{:.3} KH/s",tmp);
+                result = format!("{:.3} KH/s", tmp);
             } else if val > MB && val < GB {
                 let tmp = val / MB;
-                result =  format!("{:.3} MH/s",tmp);        
+                result = format!("{:.3} MH/s", tmp);
             } else if val > GB && val < TB {
                 let tmp = val / GB;
-                result =  format!("{:.3} GH/s",tmp);
+                result = format!("{:.3} GH/s", tmp);
             }
             println!("Benchmark \t: {}", result);
         }
-        
-        
-
     } else {
-        if matches.is_present("FILE") && matches.is_present("TARGET") && matches.is_present("METHODS") {
-            let now = SystemTime::now();
+        if matches.is_present("FILE")
+            && matches.is_present("TARGET")
+            && matches.is_present("METHODS")
+        {
+            let start = String::from(time::now().rfc822().to_string());
             filename = matches.value_of("FILE").unwrap().to_string();
             target = matches.value_of("TARGET").unwrap().to_string();
             if matches.is_present("VERBOSE") {
-                println!("CPU : {}\nMemory : {}",GetCpuInfo(),GetMemInfo() );
+                println!("CPU : {}\nMemory : {}", GetCpuInfo(), GetMemInfo());
             }
-            println!("wordlist use \t: {}",filename.clone() );
-            println!("hash to find \t: {}",target.clone());
-            println!("Methods use  \t: {}", StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap()));
+            println!("wordlist use \t: {}", filename.clone());
+            println!("hash to find \t: {}", target.clone());
+            println!(
+                "Methods use  \t: {}",
+                StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap())
+            );
             println!("===================================");
             let f = File::open(filename).unwrap();
-            let mut count : u32 = 0;
+            let mut count: u32 = 0;
             let mut lines = BufReader::new(f).lines();
+
             for line in lines {
-                let mut l = String::new();
-                match line {
-                    Ok(ll) => {
-                        count+=1;
-                        l = ll;
-                    }
-                    Err(err) => {
-                        if matches.is_present("VERBOSE") {
-                            println!("Error : {}",err);
+                
+                
+
+                    let mut l = String::new();
+                    match line {
+                        Ok(ll) => {
+                            count += 1;
+                            l = ll;
+                        }
+                        Err(err) => {
+                            if matches.is_present("VERBOSE") {
+                                println!("Error : {}", err);
+                            }
                         }
                     }
-                }
-                
-                HASH = SwitchHashMethods(l.clone(),matches.value_of("METHODS").unwrap().parse::<i32>().unwrap());
+                    HASH = SwitchHashMethods(l.clone(),matches.value_of("METHODS").unwrap().parse::<i32>().unwrap());
 
-                
-                if HASH == target {
-                    valueHash = l.clone();
-                    finded = true;
-                }
+                    if HASH == target {
+                        valueHash = l.clone();
+                        finded = true;
+                    }
 
-                
-                if matches.is_present("VERBOSE") {
-                    println!("{}    \t: {}",l.clone(),HASH);
-                }
+                    if matches.is_present("VERBOSE") {
+                        println!("{}    \t: {}", l.clone(), HASH);
+                    }
+                    
+                    
 
                 if finded {
-                    println!("Hash found : \"{}\"",valueHash.clone() );
+                    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+                    stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)));
+                    writeln!(&mut stdout,"Hash found : \"{}\"", valueHash.clone());
+                    stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
+                    //println!("Hash found : \"{}\"", valueHash.clone());
                     break;
-                } 
+                }
             }
 
             if matches.is_present("COUNT") {
-                    println!("Count : {}",count );
+                println!("Count : {}", count);
             }
             if !finded {
-                println!("Hash not found");
+                let mut stdout = StandardStream::stdout(ColorChoice::Always);
+                stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red)));
+                writeln!(&mut stdout,"Hash not found");
+                stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
+                //println!("Hash not found");
             }
-            let time : f32 = now.elapsed().unwrap().as_millis() as f32 / 1000 as f32;
-            println!("Time : {:.2}s",time);
-
-            
+            let stop = String::from(time::now().rfc822().to_string());
+            println!("Started : {}", start );
+            println!("Stopped : {}", stop );
         } else {
             app.print_help();
         }
     }
-    
 }
 
-fn SwitchHashMethods(text : String, method : i32) -> String {
+fn SwitchHashMethods(text: String, method: i32) -> String {
     let mut result = String::new();
     match method {
         1 => result = HashMD5(text),
         2 => result = HashSHA1(text),
         3 => result = HashSHA256(text),
+        4 => result = HashSHA512(text),
         _ => result = HashMD5(text),
     }
     return result;
 }
 
-fn StringMethods(method : i32) -> String {
+fn StringMethods(method: i32) -> String {
     let mut result = String::new();
-    if method == 1 {
-        result = String::from("MD5");
-    } else if method == 2 {
-        result = String::from("SHA-1");
-    } else if method == 3 {
-        result = String::from("SHA-256");
+    match method {
+        1 => result = String::from("MD5"),
+        2 => result = String::from("SHA-1"),
+        3 => result = String::from("SHA-256"),
+        4 => result = String::from("SHA-512"),
+        _ => result = String::from("MD5"),
     }
     return result;
 }
 
-
-fn HashMD5(text :String) -> String {
+fn HashMD5(text: String) -> String {
     let mut hasher = Md5::new();
     hasher.input(text);
     let tmp = hasher.result();
-    let result = format!("{:x}",tmp);
+    let result = format!("{:x}", tmp);
     return result;
 }
 
-
-fn HashSHA1(text : String) -> String {
+fn HashSHA1(text: String) -> String {
     let mut hasher = Sha1::new();
     hasher.input(text);
     let tmp = hasher.result();
-    let result = format!("{:x}",tmp);
+    let result = format!("{:x}", tmp);
     return result;
 }
 
-fn HashSHA256(text : String) -> String {
+fn HashSHA256(text: String) -> String {
     let mut hasher = Sha256::new();
     hasher.input(text);
     let tmp = hasher.result();
-    let result = format!("{:x}",tmp);
+    let result = format!("{:x}", tmp);
+    return result;
+}
+
+fn HashSHA512(text: String) -> String {
+    let mut hasher = Sha512::new();
+    hasher.input(text);
+    let tmp = hasher.result();
+    let result = format!("{:x}", tmp);
     return result;
 }
 
 fn GetCpuInfo() -> String {
-    let info : hardware::SysInfo = hardware::SysInfo::new();
+    let info: hardware::SysInfo = hardware::SysInfo::new();
     return info.cpu.brand;
 }
 
 fn GetMemInfo() -> String {
-    let info : hardware::SysInfo = hardware::SysInfo::new();
-    let result = format!("{:.2} GB / {:.2} GB",info.mem.free as f64/ MB,info.mem.total as f64 / MB);
+    let info: hardware::SysInfo = hardware::SysInfo::new();
+    let result = format!(
+        "{:.2} GB / {:.2} GB",
+        info.mem.free as f64 / MB,
+        info.mem.total as f64 / MB
+    );
     return result;
 }
 
 fn GetHardInfo() -> String {
-    let info : hardware::SysInfo = hardware::SysInfo::new();
+    let info: hardware::SysInfo = hardware::SysInfo::new();
     let cpu = &info.cpu;
     let mem = &info.mem;
     let os = &info.os;
@@ -219,12 +248,9 @@ fn GetHardInfo() -> String {
     return result;
 }
 
-
-
-
-fn Options<'a>() -> clap::App<'a,'a> {
+fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.1.6")
+                            .version("0.0.2.1")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -237,7 +263,7 @@ fn Options<'a>() -> clap::App<'a,'a> {
                                 .short("m")
                                 .required(false)
                                 .takes_value(true)
-                                .help("Set methods for hashing : \n1) \t: MD5\n2) \t: SHA-1\n3) \t: SHA-256\n4) \t: SHA-512 (Not implemented)"))
+                                .help("Set methods for hashing : \n1) \t: MD5\n2) \t: SHA-1\n3) \t: SHA-256\n4) \t: SHA-512"))
                             .arg(Arg::with_name("TARGET")
                                 .short("t")
                                 .long("target")
@@ -269,5 +295,4 @@ fn Options<'a>() -> clap::App<'a,'a> {
                                 .help("Show this message"));
 
     return result;
-
 }
