@@ -1,6 +1,7 @@
 #![crate_type = "bin"]
 
 extern crate clap;
+mod hardware;
 
 
 use std::fs::*;
@@ -30,6 +31,10 @@ fn main() {
     let mut valueHash : String = String::new();
     let mut finded = false;
     let mut HASH = String::new();
+    if matches.is_present("HARDWARE") {
+        println!("{}", GetHardInfo() );
+        std::process::exit(0);
+    }
     if matches.is_present("BENCH") {
         
         if matches.is_present("METHODS") {
@@ -84,6 +89,9 @@ fn main() {
             let now = SystemTime::now();
             filename = matches.value_of("FILE").unwrap().to_string();
             target = matches.value_of("TARGET").unwrap().to_string();
+            if matches.is_present("VERBOSE") {
+                println!("CPU : {}\nMemory : {}",GetCpuInfo(),GetMemInfo() );
+            }
             println!("wordlist use \t: {}",filename.clone() );
             println!("hash to find \t: {}",target.clone());
             println!("Methods use  \t: {}", StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap()));
@@ -190,14 +198,33 @@ fn HashSHA256(text : String) -> String {
     return result;
 }
 
+fn GetCpuInfo() -> String {
+    let info : hardware::SysInfo = hardware::SysInfo::new();
+    return info.cpu.brand;
+}
 
+fn GetMemInfo() -> String {
+    let info : hardware::SysInfo = hardware::SysInfo::new();
+    let result = format!("{:.2} GB / {:.2} GB",info.mem.free as f64/ MB,info.mem.total as f64 / MB);
+    return result;
+}
+
+fn GetHardInfo() -> String {
+    let info : hardware::SysInfo = hardware::SysInfo::new();
+    let cpu = &info.cpu;
+    let mem = &info.mem;
+    let os = &info.os;
+    let result = format!("CPU  \t\t: {}\nCPU cores \t: {}\nMemory   \t: {:.2} GB / {:.2} GB\nOS   \t\t: {}\nOS version \t: {}",cpu.brand,cpu.cores,
+     mem.free as f64 / MB,mem.total as f64 / MB,os.name,os.version);
+    return result;
+}
 
 
 
 
 fn Options<'a>() -> clap::App<'a,'a> {
     let result = App::new("RustHash")
-                            .version("0.0.1.5")
+                            .version("0.0.1.6")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -231,6 +258,10 @@ fn Options<'a>() -> clap::App<'a,'a> {
                                 .long("benchmark")
                                 .required(false)
                                 .help("Test hash perfs"))
+                            .arg(Arg::with_name("HARDWARE")
+                                .long("hardware-info")
+                                .required(false)
+                                .help("Show info hardware"))                                
                             .arg(Arg::with_name("HELP")
                                 .short("h")
                                 .long("help")

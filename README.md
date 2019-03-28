@@ -4,6 +4,8 @@
 
 ### Installation ###
 
+*This program work only for x64 OS*
+
 Download the Rust source and compile then.
 
 ### Usage/Help ###
