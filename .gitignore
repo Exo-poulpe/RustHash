@@ -2,4 +2,5 @@
 **/*.rs.bk
 *.pot
 /src/Capture
-/src/hashes.txt
+/src/*.txt
+/src/*.exe
