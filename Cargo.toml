@@ -1,6 +1,6 @@
 [package]
 name = "RustHash"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Exo-poulpe <exo.poulpe@outlook.com>"]
 edition = "2018"
 

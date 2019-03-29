@@ -58,7 +58,7 @@ Time elapsed    : 0.85s
 Methods use     : MD5
 Hash number     : 1000000
 ===================================
-Time elapsed    : 24.15s
-Benchmark       : 41.415 KH/s
+Time elapsed    : 20.78s
+Benchmark       : ~48.116 KH/s
 ```
-For benchmark RustHash test 1'000'000 MD5 hash (default)
+For benchmark RustHash test 1'000'000 MD5 hash (default), the result is not very accurate

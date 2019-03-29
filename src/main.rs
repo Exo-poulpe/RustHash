@@ -54,11 +54,9 @@ fn main() {
 
     // Options BENCH
     if matches.is_present("BENCH") {
+        println!("CPU : {}",GetCpuInfo() );
         if matches.is_present("METHODS") {
-            println!(
-                "Methods use  \t: {}",
-                StringMethods(matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse value of flag"))
-            );
+            println!("Methods use  \t: {}",StringMethods(matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse value of flag")));
         } else {
             println!("Methods use  \t: {}", StringMethods(1));
         }

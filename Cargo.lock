@@ -1,6 +1,6 @@
 [[package]]
 name = "RustHash"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "md-5 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
