@@ -41,7 +41,7 @@ fn main() {
 
     // Options detect hash
     if matches.is_present("DETECT") {
-        println!("Detected  \t: {}", CheckHashValidity(matches.value_of("DETECT").unwrap().to_string()));
+        println!("Detected  \t: {}", CheckHashValidity(matches.value_of("DETECT").expect("Fail to get value of flag").to_string()));
         std::process::exit(0);
     }
 
@@ -51,7 +51,7 @@ fn main() {
         if matches.is_present("METHODS") {
             println!(
                 "Methods use  \t: {}",
-                StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap())
+                StringMethods(matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse value of flag"))
             );
         } else {
             println!("Methods use  \t: {}", StringMethods(1));
@@ -65,7 +65,7 @@ fn main() {
                 if matches.is_present("METHODS") {
                     HASH = SwitchHashMethods(
                         i.to_string(),
-                        matches.value_of("METHODS").unwrap().parse::<i32>().unwrap(),
+                        matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse value of flag"),
                     );
                 } else {
                     HASH = HashMD5(i.to_string());
@@ -76,11 +76,11 @@ fn main() {
             }
         });
 
-        T.join().unwrap();
+        T.join();
 
-        println!("Time elapsed \t: {:.2}s", start.elapsed().unwrap().as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
+        println!("Time elapsed \t: {:.2}s", start.elapsed().expect("Fail to get value of time").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
 
-        let diff = start.elapsed().unwrap().as_millis() as f64;
+        let diff = start.elapsed().expect("Fail to get value of time").as_millis() as f64;
         // Calc benchmark
         let timePass = diff / DEFAULT_SECOND_DIV as f64;
         if timePass > 0.0 {
@@ -105,8 +105,8 @@ fn main() {
             && matches.is_present("METHODS")
         {
             let start = SystemTime::now();
-            filename = matches.value_of("FILE").unwrap().to_string();
-            target = matches.value_of("TARGET").unwrap().to_string();
+            filename = matches.value_of("FILE").expect("Fail to get value of flag").to_string();
+            target = matches.value_of("TARGET").expect("Fail to get value of flag").to_string();
             if matches.is_present("VERBOSE") {
                 println!("CPU : {}\nMemory : {}", GetCpuInfo(), GetMemInfo());
             }
@@ -114,10 +114,21 @@ fn main() {
             println!("hash to find \t: {}", target.clone());
             println!(
                 "Methods use  \t: {}",
-                StringMethods(matches.value_of("METHODS").unwrap().parse::<i32>().unwrap())
+                StringMethods(matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse flag value"))
             );
             println!("===================================");
-            let f = File::open(filename).unwrap();
+
+            if !matches.is_present("DISABLE_POTFILE") {
+                let ret = CheckPotFile(target.clone());
+                if ret != "" {
+                    let result = format!("Hash found : \"{}\"",ret);
+                    PrintColor(result, Color::Green);
+                    println!("Time elapsed : {:.2}s", start.elapsed().expect("Fail to get time value").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
+                    std::process::exit(0);
+                }
+            }
+
+            let f = File::open(filename).expect("Fail to open file");
             let mut count: u32 = 0;
             let mut lines = BufReader::new(f).lines();
 
@@ -137,7 +148,7 @@ fn main() {
                             }
                         }
                     }
-                    HASH = SwitchHashMethods(l.clone(),matches.value_of("METHODS").unwrap().parse::<i32>().unwrap());
+                    HASH = SwitchHashMethods(l.clone(),matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse value of flag"));
 
                     if HASH == target {
                         valueHash = l.clone();
@@ -151,11 +162,11 @@ fn main() {
                     
 
                 if finded {
-                    let mut stdout = StandardStream::stdout(ColorChoice::Always);
-                    stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)));
-                    writeln!(&mut stdout,"Hash found : \"{}\"", valueHash.clone());
-                    stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
-                    //println!("Hash found : \"{}\"", valueHash.clone());
+                    let result = format!("Hash found : \"{}\"", valueHash.clone());
+                    PrintColor(result, Color::Green);
+                    if !matches.is_present("DISABLE_POTFILE") {
+                        AddToPotFile(target.clone(), valueHash.clone());
+                    }
                     break;
                 }
             }
@@ -164,13 +175,9 @@ fn main() {
                 println!("Count \t\t: {}", count);
             }
             if !finded {
-                let mut stdout = StandardStream::stdout(ColorChoice::Always);
-                stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red)));
-                writeln!(&mut stdout,"Hash not found");
-                stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
-                //println!("Hash not found");
+                PrintColor("Hash not found".to_string(), Color::Red);
             }
-            println!("Time elapsed : {:.2}s", start.elapsed().unwrap().as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
+            println!("Time elapsed : {:.2}s", start.elapsed().expect("Fail to get time value").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
         } else {
             app.print_help();
         }
@@ -243,6 +250,13 @@ fn HashMD4(text : String) -> String {
     return result;
 }
 
+fn PrintColor(text : String, c : Color) {
+        let mut stdout = StandardStream::stdout(ColorChoice::Always);
+        stdout.set_color(ColorSpec::new().set_fg(Some(c)));
+        writeln!(&mut stdout,"{}",text);
+        stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
+}
+
 fn CheckHashValidity(hash : String) -> String {
     let mut result = String::from("MD5");
     match hash.len() {
@@ -254,6 +268,51 @@ fn CheckHashValidity(hash : String) -> String {
     }
 
     return result;
+}
+
+fn CheckPotFile(hash : String) -> String
+{
+    let mut result = String::from("");
+    match File::open("rusthash.pot") {
+        Ok(f) => {
+            let lines = BufReader::new(f).lines();
+            for line in lines {
+
+                match line {
+                        Ok(ll) => {
+                            let potHash : Vec<&str> = ll.split(":").collect();
+                            if potHash[0] == hash {
+                                result = potHash[1].to_string(); 
+                                break;
+                            }
+                        }
+                        _ => {
+
+                        }
+                    }
+
+            }
+        }
+        _ => {
+            let potFile = File::create("rusthash.pot").expect("File not create");
+        }
+
+    }
+        return result;
+}
+
+fn AddToPotFile(hash : String,text : String) {
+    let mut file = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .open("rusthash.pot")
+        .expect("Fail to open pot file");
+
+    let result = format!("{}:{}",hash,text);
+
+    if let Err(e) = writeln!(file, "{}" ,result) {
+        eprintln!("Couldn't write to pot file: {}", e);
+    }
 }
 
 fn GetCpuInfo() -> String {
@@ -283,7 +342,7 @@ fn GetHardInfo() -> String {
 
 fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.2.5")
+                            .version("0.0.2.6")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -313,6 +372,10 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                                 .long("verbose")
                                 .required(false)
                                 .help("More verbose output"))
+                            .arg(Arg::with_name("DISABLE_POTFILE")
+                                .long("disable-potfile")
+                                .required(false)
+                                .help("Disable potfile check"))
                             .arg(Arg::with_name("COUNT")
                                 .short("c")
                                 .required(false)
