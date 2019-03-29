@@ -10,7 +10,7 @@ Download the Rust source and compile then.
 
 ### Usage/Help ###
 ```
-RustHash 0.0.2.9
+RustHash 0.0.3.1
 Exo-poulpe
 Rust hash test hash from wordlist
 
@@ -19,10 +19,10 @@ USAGE:
 
 FLAGS:
     -b, --benchmark          Test hash perfs
-    -c                       Show number of password tested
+    -c                       Print number of password tested
         --disable-potfile    Disable potfile check
-        --hardware-info      Show info hardware
-    -h, --help               Show this message
+        --hardware-info      Print info hardware
+    -h, --help               Print this message
     -v, --verbose            More verbose output
     -V, --version            Prints version information
 
