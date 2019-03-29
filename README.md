@@ -10,7 +10,7 @@ Download the Rust source and compile then.
 
 ### Usage/Help ###
 ```
-RustHash 0.0.2.6
+RustHash 0.0.2.9
 Exo-poulpe
 Rust hash test hash from wordlist
 
@@ -35,7 +35,7 @@ OPTIONS:
                                   3)    : SHA-1
                                   4)    : SHA-256
                                   5)    : SHA-512
-    -t, --target <TARGET>         Set hash target for test
+    -t, --target <TARGET>         Set hashes to test (file or string)
 ```
 ### Exemple ###
 For exemple : s
