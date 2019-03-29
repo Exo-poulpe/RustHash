@@ -43,7 +43,11 @@ fn main() {
 
     // Options detect hash
     if matches.is_present("DETECT") {
-        println!("Detected  \t: {}", CheckHashValidity(matches.value_of("DETECT").expect("Fail to get value of flag").to_string()));
+        let hashToDetect : Vec<String> = TargetIsFile(matches.value_of("DETECT").expect("Fail to unwrap").to_string());
+        let detected : Vec<String> = CheckHashValidity(hashToDetect.clone());
+        for i in 0..hashToDetect.len() {
+            println!("Hash \t: {}  detect \t: {}",hashToDetect[i].clone(),detected[i].clone() );
+        }
         std::process::exit(0);
     }
 
@@ -124,7 +128,7 @@ fn main() {
             } 
             else 
             {
-                println!("file hashes to find \t: {}", matches.value_of("TARGET").expect("Fail to get value of flag").to_string() );
+                println!("file hashes \t: {}", matches.value_of("TARGET").expect("Fail to get value of flag").to_string() );
             }
             println!("Methods use  \t: {}",StringMethods(matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse flag value")));
             println!("===================================");
@@ -285,14 +289,18 @@ fn StringMethods(method: i32) -> String {
     return result;
 }
 
-fn CheckHashValidity(hash : String) -> String {
-    let mut result = String::from("MD5");
+fn CheckHashValidity(hashes : Vec<String>) -> Vec<String> {
+
+    let mut result : Vec<String> = Vec::new();
+    
+    for hash in hashes {
     match hash.len() {
-        32 => result = String::from("MD5 / MD4"),
-        40 => result = String::from("SHA-1"),
-        64 => result = String::from("SHA-256"),
-        128 => result = String::from("SHA-512"),
-        _ => result = String::from("Detect failed"),
+        32 => result.push(String::from("MD5 / MD4")),
+        40 => result.push(String::from("SHA-1")),
+        64 => result.push(String::from("SHA-256")),
+        128 => result.push(String::from("SHA-512")),
+        _ => result.push(String::from("Detect failed")),
+    }
     }
     return result;
 }
@@ -392,14 +400,14 @@ fn TargetIsFile(option : String) -> Vec<String> {
             for line in lines {
                 match line {
                     Ok(l) => {
-                        result.push(l);
+                        result.push(l.to_lowercase());
                     }
                     _ => {}
                 }
             }
         }
         Err(_) => {
-            result.push(option.clone());
+            result.push(option.clone().to_lowercase());
         }
     }
 
@@ -413,7 +421,7 @@ fn TargetIsFile(option : String) -> Vec<String> {
 // OPTIONS parser
 fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.2.9")
+                            .version("0.0.3.1")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -450,7 +458,7 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                             .arg(Arg::with_name("COUNT")
                                 .short("c")
                                 .required(false)
-                                .help("Show number of password tested"))
+                                .help("Print number of password tested"))
                             .arg(Arg::with_name("BENCH")
                                 .short("b")
                                 .long("benchmark")
@@ -459,12 +467,12 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                             .arg(Arg::with_name("HARDWARE")
                                 .long("hardware-info")
                                 .required(false)
-                                .help("Show info hardware"))                                
+                                .help("Print info hardware"))                                
                             .arg(Arg::with_name("HELP")
                                 .short("h")
                                 .long("help")
                                 .required(false)
-                                .help("Show this message"));
+                                .help("Print this message"));
 
     return result;
 }
