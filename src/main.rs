@@ -102,7 +102,7 @@ fn main() {
                 let tmp = val / GB;
                 result = format!("{:.3} GH/s", tmp);
             }
-            println!("Benchmark \t: {}", result);
+            println!("Benchmark \t: ~{}", result);
         }
     } 
     else //////////////////////////////////////////////////////////////////////////////
@@ -142,13 +142,13 @@ fn main() {
                     if !matches.is_present("DISABLE_POTFILE") {
                     let ret = CheckPotFile(HashLine.clone());
                     if ret != "" {
-                        let mut result = format!("Hash found : \"{}\"",ret);
+                        let mut result = format!("Hash found \t: \"{}\"",ret);
                         if target.len() == 1 
                         {
                             PrintColor(result, Color::Green);
                         } else 
                         {
-                            result = format!("Hash found : \"{}\":{}", HashLine.clone(),ret);
+                            result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),ret);
                             PrintColor(result, Color::Green);
                         }
                         finded = true;
@@ -195,7 +195,7 @@ fn main() {
                         
 
                     if finded {
-                        let result = format!("Hash found : \"{}\":{}", HashLine.clone(),valueHash.clone());
+                        let result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),valueHash.clone());
                         PrintColor(result, Color::Green);
                         if !matches.is_present("DISABLE_POTFILE") {
                             AddToPotFile(HashLine.clone(),valueHash.clone());
@@ -211,6 +211,7 @@ fn main() {
                 }
                 if matches.is_present("COUNT") {
                     println!("Count \t\t: {}", count);
+                    count = 0;
                 }
 
             }

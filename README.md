@@ -50,8 +50,8 @@ wordlist use    : lst.txt
 hash to find    : 1a79a4d60de6718e8e5b326e338ae533
 Methods use     : MD5
 ===================================
-Hash find : "example"
-Time : 1.34s
+Hash found      : "1a79a4d60de6718e8e5b326e338ae533":example
+Time elapsed    : 0.85s
 ```
 ### Benchmark ###
 ```
