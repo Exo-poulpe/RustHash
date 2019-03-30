@@ -4,13 +4,13 @@
 
 ### Installation ###
 
-*This program work only for x64 OS*
+*This program work only for Windows x64 OS*
 
 Download the Rust source and compile then.
 
 ### Usage/Help ###
 ```
-RustHash 0.0.3.1
+RustHash 0.0.3.2
 Exo-poulpe
 Rust hash test hash from wordlist
 
@@ -27,15 +27,16 @@ FLAGS:
     -V, --version            Prints version information
 
 OPTIONS:
-        --detect-hash <DETECT>    Check if hash is valid
-    -f, --file <FILE>             Set wordlist to use
-    -m <METHODS>                  Set methods for hashing :
-                                  1)    : MD5
-                                  2)    : MD4
-                                  3)    : SHA-1
-                                  4)    : SHA-256
-                                  5)    : SHA-512
-    -t, --target <TARGET>         Set hashes to test (file or string)
+        --detect-hash <DETECT>           Check if hash is valid
+    -f, --file <FILE>                    Set wordlist to use
+    -m <METHODS>                         Set methods for hashing :
+                                         1)     : MD5
+                                         2)     : MD4
+                                         3)     : SHA-1
+                                         4)     : SHA-256
+                                         5)     : SHA-512
+        --path-potfile <PATH_POTFILE>    Choose potfile to use
+    -t, --target <TARGET>                Set hashes to test (file or string)
 ```
 ### Exemple ###
 For exemple : s
@@ -62,3 +63,5 @@ Time elapsed    : 20.78s
 Benchmark       : ~48.116 KH/s
 ```
 For benchmark RustHash test 1'000'000 MD5 hash (default), the result is not very accurate
+### Features ###
+This program have this own potfile and options for use then

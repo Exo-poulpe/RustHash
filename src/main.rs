@@ -138,7 +138,12 @@ fn main() {
 
                     // Disable potfile checking
                     if !matches.is_present("DISABLE_POTFILE") {
-                    let ret = CheckPotFile(HashLine.clone());
+                    let mut ret : String;
+                        if matches.is_present("PATH_POTFILE") {
+                            ret = CheckPotFile(HashLine.clone(),matches.value_of("PATH_POTFILE").expect("Fail to get potfile value").to_string());
+                        } else {
+                            ret = CheckPotFile(HashLine.clone(),"".to_string());
+                        }
                     if ret != "" {
                         let mut result = format!("Hash found \t: \"{}\"",ret);
                         if target.len() == 1 
@@ -310,10 +315,16 @@ fn CheckHashValidity(hashes : Vec<String>) -> Vec<String> {
 
 
 // POTFILE func
-fn CheckPotFile(hash : String) -> String
+fn CheckPotFile(hash : String,filePath : String) -> String
 {
     let mut result = String::from("");
-    match File::open("rusthash.pot") {
+    let fileResult : String;
+    if filePath != "" {
+        fileResult = filePath;
+    } else {
+        fileResult = String::from("rusthash.pot");
+    }
+    match File::open(fileResult) {
         Ok(f) => {
             let lines = BufReader::new(f).lines();
             for line in lines {
@@ -420,7 +431,7 @@ fn TargetIsFile(option : String) -> Vec<String> {
 // OPTIONS parser
 fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.3.1")
+                            .version("0.0.3.2")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -454,6 +465,11 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                                 .long("disable-potfile")
                                 .required(false)
                                 .help("Disable potfile check"))
+                            .arg(Arg::with_name("PATH_POTFILE")
+                                .long("path-potfile")
+                                .required(false)
+                                .takes_value(true)
+                                .help("Choose potfile to use"))
                             .arg(Arg::with_name("COUNT")
                                 .short("c")
                                 .required(false)
