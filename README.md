@@ -10,7 +10,7 @@ Download the Rust source and compile then.
 
 ## Usage/Help ##
 
-```sh
+```
 RustHash 0.0.3.3
 Exo-poulpe
 Rust hash test hash from wordlist
@@ -46,7 +46,7 @@ OPTIONS:
 
 For exemple :
 
-```sh
+```
 ./RustHash.exe -t "1a79a4d60de6718e8e5b326e338ae533" -f lst.txt -m 1
 ```
 
@@ -54,7 +54,7 @@ With this command the hash "1a79a4d60de6718e8e5b326e338ae533::example" and use t
 
 Result :
 
-```sh
+```
 wordlist use    : lst.txt
 hash to find    : 1a79a4d60de6718e8e5b326e338ae533
 Methods use     : MD5
@@ -65,7 +65,7 @@ Time elapsed    : 0.85s
 
 ## Benchmark ##
 
-```sh
+```
 Methods use     : MD5
 Hash number     : 1000000
 ===================================
