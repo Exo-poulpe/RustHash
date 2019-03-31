@@ -61,7 +61,7 @@ fn main() {
             println!("Methods use  \t: {}", StringMethods(1));
         }
         println!("Hash number \t: {}", DEFAULT_BENCH_VALUE);
-        println!("===================================");
+        println!("{:=<1$}", "", 35);
         let start = SystemTime::now();
 
         let T = thread::spawn(move || {
@@ -105,6 +105,18 @@ fn main() {
     } 
     else //////////////////////////////////////////////////////////////////////////////
     {
+        if matches.is_present("FILE") && matches.is_present("GENERATE_POTFILENAME") && matches.is_present("METHODS") {
+                let path : String = matches.value_of("FILE").expect("Fail to read file options").to_string();
+                let potfile : String = matches.value_of("GENERATE_POTFILENAME").expect("Fail to use custom path for potfile").to_string();
+                let m : i32 = matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse flag value");
+                println!("Start to generate using : {} ",path);
+                println!("Hash use \t: {}", StringMethods(m.clone()));
+                println!("{:=<1$}", "", 35);
+                GeneratePotFile(path.clone(), potfile.clone(), m.clone());
+                std::process::exit(0);
+        }
+
+
         // If program start normaly
         if matches.is_present("FILE") && matches.is_present("TARGET") && matches.is_present("METHODS")
         {
@@ -129,7 +141,7 @@ fn main() {
                 println!("file hashes \t: {}", matches.value_of("TARGET").expect("Fail to get value of flag").to_string() );
             }
             println!("Methods use  \t: {}",StringMethods(matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse flag value")));
-            println!("===================================");
+            println!("{:=<1$}", "", 35);
 
             // For each string in array
             for HashLine in target.clone() {
@@ -145,7 +157,7 @@ fn main() {
                             ret = CheckPotFile(HashLine.clone(),"".to_string());
                         }
                     if ret != "" {
-                        let mut result = format!("Hash found \t: \"{}\"",ret);
+                        let mut result = format!("Hash found \t: \"{}\":{}",HashLine.clone(), ret);
                         if target.len() == 1 
                         {
                             PrintColor(result, Color::Green);
@@ -201,7 +213,7 @@ fn main() {
                         let result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),valueHash.clone());
                         PrintColor(result, Color::Green);
                         if !matches.is_present("DISABLE_POTFILE") {
-                            AddToPotFile(HashLine.clone(),valueHash.clone());
+                            AddToPotFile(HashLine.clone(),valueHash.clone(),"".to_string());
                         }
                         break;
                     }
@@ -349,12 +361,15 @@ fn CheckPotFile(hash : String,filePath : String) -> String
         return result;
 }
 
-fn AddToPotFile(hash : String,text : String) {
-    let mut file = OpenOptions::new()
-        .write(true)
-        .append(true)
-        .open("rusthash.pot")
-        .expect("Fail to open pot file");
+fn AddToPotFile(hash : String,text : String,potFileName :String) {
+    let mut file;
+    if potFileName != "".to_string() {
+        file = OpenOptions::new()
+        .write(true).append(true).open(potFileName).expect("Fail to open pot file");
+    } else {
+        file = OpenOptions::new()
+        .write(true).append(true).open("rusthash.pot").expect("Fail to open (default) pot file");
+    }
 
     let result = format!("{}:{}",hash,text);
 
@@ -362,6 +377,33 @@ fn AddToPotFile(hash : String,text : String) {
         eprintln!("Couldn't write to pot file: {}", e);
     }
 }
+
+fn GeneratePotFile(wordlist : String,filename : String,method : i32) {
+    if filename != "".to_string() {
+        File::create(filename.clone()).expect("Fail to create file");
+    }
+    
+    let f = File::open(wordlist.clone()).expect("Fail to open file");
+    let lines = BufReader::new(&f).lines();
+    let mut HASH = String::new();
+    let mut count : u32 = 0;
+
+    for line in lines {
+        match line {
+            Ok(l) => {
+                HASH = SwitchHashMethods(l.clone(),method.clone());
+                AddToPotFile(HASH,l.clone(),filename.clone());
+                count+=1;
+            }
+            Err(e) => {
+                eprintln!("Fail to read line for potfile {}",e);
+            }
+        }
+    }
+    println!("Total password \t: {}",count );
+    
+}
+
 /////////////////////
 
 
@@ -431,7 +473,7 @@ fn TargetIsFile(option : String) -> Vec<String> {
 // OPTIONS parser
 fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.3.2")
+                            .version("0.0.3.3")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -460,7 +502,7 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                                 .short("v")
                                 .long("verbose")
                                 .required(false)
-                                .help("More verbose output"))
+                                .help("More verbose output (slower)"))
                             .arg(Arg::with_name("DISABLE_POTFILE")
                                 .long("disable-potfile")
                                 .required(false)
@@ -470,10 +512,15 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                                 .required(false)
                                 .takes_value(true)
                                 .help("Choose potfile to use"))
+                            .arg(Arg::with_name("GENERATE_POTFILENAME")
+                                .long("generate-potfile")
+                                .required(false)
+                                .takes_value(true)
+                                .help("Generate a potfile (slower)"))
                             .arg(Arg::with_name("COUNT")
                                 .short("c")
                                 .required(false)
-                                .help("Print number of password tested"))
+                                .help("Print number of password tested (slower)"))
                             .arg(Arg::with_name("BENCH")
                                 .short("b")
                                 .long("benchmark")
