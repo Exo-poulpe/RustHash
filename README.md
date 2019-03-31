@@ -11,7 +11,7 @@ Download the Rust source and compile then.
 ## Usage/Help ##
 
 ```
-RustHash 0.0.3.3
+RustHash 0.0.3.4
 Exo-poulpe
 Rust hash test hash from wordlist
 
@@ -20,6 +20,7 @@ USAGE:
 
 FLAGS:
     -b, --benchmark          Test hash perfs
+        --check              Just compare with potfile precompute or current potfile
     -c                       Print number of password tested (slower)
         --disable-potfile    Disable potfile check
         --hardware-info      Print info hardware

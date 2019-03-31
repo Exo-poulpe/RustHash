@@ -112,6 +112,52 @@ fn main() {
                 std::process::exit(0);
         }
 
+        if matches.is_present("TARGET") && matches.is_present("PATH_POTFILE") && matches.is_present("CHECK_POTFILE") {
+
+            target = TargetIsFile(matches.value_of("TARGET").expect("Fail to get value of target").to_string());
+            let mut ret = String::new();
+            let potfile = matches.value_of("PATH_POTFILE").expect("Fail to get potfile value").to_string();
+            let m : i32 = matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse flag value");
+            let mut start = SystemTime::now();
+            println!("Check potfile \t: {}",potfile.clone() );
+            println!("Hash use \t: {}", StringMethods(m.clone()));
+            println!("{:=<1$}", "", 35);
+            for HashLine in target.clone() {
+
+                if matches.is_present("PATH_POTFILE") 
+                {
+                    ret = CheckPotFile(HashLine.clone(),potfile.clone());
+                } 
+                else 
+                {
+                    ret = CheckPotFile(HashLine.clone(),"".to_string());
+                }
+
+                if ret != "" 
+                {
+                    let mut result = format!("Hash found \t: \"{}\":{}",HashLine.clone(), ret);
+                    if target.clone().len() == 1
+                    {
+                        PrintColor(result, Color::Green);
+                    } else 
+                    {
+                        result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),ret);
+                        PrintColor(result, Color::Green);
+                    }
+                    finded = true;
+                }
+                else 
+                {
+                    PrintColor("Hash not found in potfile".to_string(), Color::Red);
+                }
+
+                println!("Time elapsed \t: {:.2}s", start.elapsed().expect("Fail to get time value").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
+            }
+            
+
+            std::process::exit(0);
+        }
+
 
         // If program start normaly
         if matches.is_present("FILE") && matches.is_present("TARGET") && matches.is_present("METHODS")
@@ -471,7 +517,7 @@ fn TargetIsFile(option : String) -> Vec<String> {
 // OPTIONS parser
 fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.3.3")
+                            .version("0.0.3.4")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")
@@ -505,6 +551,10 @@ fn Options<'a>() -> clap::App<'a, 'a> {
                                 .long("disable-potfile")
                                 .required(false)
                                 .help("Disable potfile check"))
+                            .arg(Arg::with_name("CHECK_POTFILE")
+                                .long("check")
+                                .required(false)
+                                .help("Just compare with potfile precompute or current potfile"))
                             .arg(Arg::with_name("PATH_POTFILE")
                                 .long("path-potfile")
                                 .required(false)
