@@ -117,10 +117,8 @@ fn main() {
             target = TargetIsFile(matches.value_of("TARGET").expect("Fail to get value of target").to_string());
             let mut ret = String::new();
             let potfile = matches.value_of("PATH_POTFILE").expect("Fail to get potfile value").to_string();
-            let m : i32 = matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse flag value");
             let mut start = SystemTime::now();
-            println!("Check potfile \t: {}",potfile.clone() );
-            println!("Hash use \t: {}", StringMethods(m.clone()));
+            println!("Check potfile \t: {}",potfile.clone());
             println!("{:=<1$}", "", 35);
             for HashLine in target.clone() {
 
@@ -249,6 +247,8 @@ fn main() {
                         
                         
 
+
+                }
                     if finded {
                         let result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),valueHash.clone());
                         PrintColor(result, Color::Green);
@@ -257,8 +257,6 @@ fn main() {
                         }
 
                     }                        
-
-                }
 
                 }
 
