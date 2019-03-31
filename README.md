@@ -4,7 +4,7 @@
 
 ## Installation ##
 
-*This program work only for Windows x64 OS
+*This program work only for Windows x64 OS*
 
 Download the Rust source and compile then.
 

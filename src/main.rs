@@ -30,7 +30,7 @@ fn main() {
     let matches = app.clone().get_matches();
     let mut filename: String;
     let mut target: Vec<String> ;
-    let mut valueHash: String = String::new();
+    let mut valueHash = String::new();
     let mut finded = false;
     let mut HASH = String::new();
     let mut count: u32 = 0;
@@ -63,25 +63,21 @@ fn main() {
         println!("Hash number \t: {}", DEFAULT_BENCH_VALUE);
         println!("{:=<1$}", "", 35);
         let start = SystemTime::now();
-
-        let T = thread::spawn(move || {
-            for i in 0..DEFAULT_BENCH_VALUE as u64 {
+        
+            for i in 0..DEFAULT_BENCH_VALUE as u64{
                 if matches.is_present("METHODS") {
                     HASH = SwitchHashMethods(
                         i.to_string(),
-                        matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse value of flag"),
-                    );
+                        matches.value_of("METHODS").expect("Fail to get value of flag").parse::<i32>().expect("Fail to parse value of flag"));
                 } else {
                     HASH = HashMD5(i.to_string());
                 }
+
                 if matches.is_present("VERBOSE") {
                     println!("{} : {}", i, HASH);
                 }
             }
-        });
-
-        T.join();
-
+        
         println!("Time elapsed \t: {:.2}s", start.elapsed().expect("Fail to get value of time").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
 
         let diff = start.elapsed().expect("Fail to get value of time").as_millis() as f64;
@@ -174,16 +170,14 @@ fn main() {
                 // if password is not in potfile
                 if !finded 
                 {
-
                 
-
                 let f = File::open(filename.clone()).expect("Fail to open file");
                 let mut lines = BufReader::new(f).lines();
                 count = 0;
 
                 // Read file line by line
                 for line in lines {
-                    
+
                         let mut l = String::new();
                         match line {
                             Ok(ll) => {
@@ -204,7 +198,7 @@ fn main() {
                         }
 
                         if matches.is_present("VERBOSE") {
-                            println!("{}    \t: {}", l.clone(), HASH);
+                            println!("{}    \t: {}", l.clone(), HASH.clone());
                         }
                         
                         
@@ -215,11 +209,15 @@ fn main() {
                         if !matches.is_present("DISABLE_POTFILE") {
                             AddToPotFile(HashLine.clone(),valueHash.clone(),"".to_string());
                         }
-                        break;
-                    }
+
+                    }                        
+
                 }
 
                 }
+
+                
+
 
                 if !finded {
                     PrintColor("Hash not found".to_string(), Color::Red);
