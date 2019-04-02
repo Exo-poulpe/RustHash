@@ -26,7 +26,7 @@ static GB: f64 = 1_000_000_000.;
 static TB: f64 = 1_000_000_000_000.;
 
 fn main() {
-    let mut app = Options();
+    let mut app : clap::App = Options();
     let matches = app.clone().get_matches();
     let mut filename: String;
     let mut target: Vec<String> ;
@@ -122,14 +122,7 @@ fn main() {
             println!("{:=<1$}", "", 35);
             for HashLine in target.clone() {
 
-                if matches.is_present("PATH_POTFILE") 
-                {
-                    ret = CheckPotFile(HashLine.clone(),potfile.clone());
-                } 
-                else 
-                {
-                    ret = CheckPotFile(HashLine.clone(),"".to_string());
-                }
+                ret = CheckPotFile(HashLine.clone(), potfile.clone());
 
                 if ret != "" 
                 {
@@ -162,8 +155,25 @@ fn main() {
         {
             let start = SystemTime::now();
 
-            filename = matches.value_of("FILE").expect("Fail to get value of flag").to_string();
-            target = TargetIsFile(matches.value_of("TARGET").expect("Fail to get value of flag").to_string());        
+            TestHash(app.clone());            
+
+            println!("Time elapsed \t: {:.2}s", start.elapsed().expect("Fail to get time value").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
+        } else {
+            app.print_help();
+        }
+    }
+}
+
+// HASH func
+// Main func for test hash
+fn TestHash(app : clap::App ) {
+            let matches = app.clone().get_matches();
+            let mut count : u32 = 0;
+            let mut finded : bool = false;
+            let mut HASH : String = String::new();
+            let mut valueHash : String = String::new();
+            let mut filename = matches.value_of("FILE").expect("Fail to get value of flag").to_string();
+            let mut target = TargetIsFile(matches.value_of("TARGET").expect("Fail to get value of flag").to_string());        
 
             if matches.is_present("VERBOSE") 
             {
@@ -239,6 +249,7 @@ fn main() {
                         if HASH == HashLine.clone() {
                             valueHash = l.clone();
                             finded = true;
+                            break;
                         }
 
                         if matches.is_present("VERBOSE") {
@@ -246,8 +257,6 @@ fn main() {
                         }
                         
                         
-
-
                 }
                     if finded {
                         let result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),valueHash.clone());
@@ -273,14 +282,8 @@ fn main() {
 
             }
 
-            println!("Time elapsed \t: {:.2}s", start.elapsed().expect("Fail to get time value").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
-        } else {
-            app.print_help();
-        }
-    }
 }
 
-// HASH func
 fn HashMD5(text: String) -> String {
     let mut hasher = Md5::new();
     hasher.input(text);

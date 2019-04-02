@@ -1,22 +1,19 @@
-extern crate sys_info;  // Memory info + os info
-extern crate raw_cpuid; // Cpu info
+extern crate raw_cpuid;
+extern crate sys_info; // Memory info + os info // Cpu info
 
+use raw_cpuid::CpuId;
 use std::convert::*;
 use std::string::String;
-use raw_cpuid::CpuId;
 
-
-
-static GB : f32 = 1000000.;
-
+static GB: f32 = 1000000.;
 
 pub struct CPU {
     pub brand: String,
     pub cores: i32,
 }
 pub struct MEM {
-    pub total:f32,
-    pub free:f32,
+    pub total: f32,
+    pub free: f32,
 }
 pub struct OS {
     pub name: String,
@@ -42,16 +39,32 @@ impl SysInfo {
         let os_name = sys_info::os_type().unwrap();
         let os_version = sys_info::os_release().unwrap();
 
-        return SysInfo { 
-            cpu:CPU{brand:String::from(Strbrand),cores:(Strcores as i32)},
-            mem:MEM{total:(mem.total as f32),free:(mem.free as f32)},
-            os:OS{name:os_name,version:os_version},
-        };        
+        return SysInfo {
+            cpu: CPU {
+                brand: String::from(Strbrand),
+                cores: (Strcores as i32),
+            },
+            mem: MEM {
+                total: (mem.total as f32),
+                free: (mem.free as f32),
+            },
+            os: OS {
+                name: os_name,
+                version: os_version,
+            },
+        };
     }
 
-    pub fn to_string(&self) -> String{
-        let tmp = format!("Processor {}\nProcessor cores : {}\nMemory : {:.2} GB / {:.2} GB\nOS : {} {}",
-            self.cpu.brand,self.cpu.cores,self.mem.free/GB,self.mem.total/GB,self.os.name,self.os.version);
+    pub fn to_string(&self) -> String {
+        let tmp = format!(
+            "Processor {}\nProcessor cores : {}\nMemory : {:.2} GB / {:.2} GB\nOS : {} {}",
+            self.cpu.brand,
+            self.cpu.cores,
+            self.mem.free / GB,
+            self.mem.total / GB,
+            self.os.name,
+            self.os.version
+        );
         return String::from(tmp);
     }
 }
