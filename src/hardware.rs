@@ -1,5 +1,5 @@
 extern crate raw_cpuid;
-extern crate sys_info; // Memory info + os info // Cpu info
+//extern crate sys_info; // Memory info + os info // Cpu info
 
 use raw_cpuid::CpuId;
 use std::convert::*;
@@ -28,16 +28,16 @@ impl SysInfo {
     pub fn new() -> SysInfo {
         // CPU
         let cpuid = CpuId::new();
-        let Strcores = sys_info::cpu_num().unwrap();
+        let Strcores = 1;//sys_info::cpu_num().unwrap();
         let tmp = cpuid.get_extended_function_info().unwrap();
         let Strbrand = tmp.processor_brand_string().unwrap();
 
         // MEM
-        let mem = sys_info::mem_info().unwrap();
+        //let mem = {total=12,free=21};//sys_info::mem_info().unwrap();
 
         // OS
-        let os_name = sys_info::os_type().unwrap();
-        let os_version = sys_info::os_release().unwrap();
+        let os_name = "moi".to_string();//sys_info::os_type().unwrap();
+        let os_version = "21".to_string();// sys_info::os_release().unwrap();
 
         return SysInfo {
             cpu: CPU {
@@ -45,8 +45,8 @@ impl SysInfo {
                 cores: (Strcores as i32),
             },
             mem: MEM {
-                total: (mem.total as f32),
-                free: (mem.free as f32),
+                total: (12 as f32),
+                free: (11 as f32),
             },
             os: OS {
                 name: os_name,

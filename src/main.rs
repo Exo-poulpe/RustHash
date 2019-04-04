@@ -119,7 +119,7 @@ fn main() {
             let potfile = matches.value_of("PATH_POTFILE").expect("Fail to get potfile value").to_string();
             let mut start = SystemTime::now();
             println!("Check potfile \t: {}",potfile.clone());
-            println!("{:=<1$}", "", 35);
+            println!("{:<1$}", "", 35);
             for HashLine in target.clone() {
 
                 ret = CheckPotFile(HashLine.clone(), potfile.clone());
@@ -156,8 +156,17 @@ fn main() {
             let start = SystemTime::now();
 
             TestHash(app.clone());            
-
-            println!("Time elapsed \t: {:.2}s", start.elapsed().expect("Fail to get time value").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
+            let mut secs = start.elapsed().expect("Fail to get time value").as_millis() as f64 / DEFAULT_SECOND_DIV as f64;
+            let mut min = 0;
+            while secs > 60 as f64 {
+                secs -= 60 as f64;
+                min += 1;
+            }
+            if min > 0 {
+                println!("Time elapsed \t: {}:{:.2}s", min,secs );
+            } else {
+                println!("Time elapsed \t: {:.2}s", secs );
+            }
         } else {
             app.print_help();
         }
