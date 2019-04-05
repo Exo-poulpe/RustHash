@@ -16,7 +16,7 @@ use md5::{Digest, Md5};
 use md4::Md4;
 use sha1::Sha1;
 use sha2::{Sha256, Sha512};
-use termcolor::*;
+use yansi::Paint;
 
 static DEFAULT_BENCH_VALUE: f64 = 1_000_000.;
 static DEFAULT_SECOND_DIV : f64 = 1_000.;
@@ -129,17 +129,19 @@ fn main() {
                     let mut result = format!("Hash found \t: \"{}\":{}",HashLine.clone(), ret);
                     if target.clone().len() == 1
                     {
-                        PrintColor(result, Color::Green);
+                        println!("{}", Paint::red(result.clone()) );
                     } else 
                     {
                         result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),ret);
-                        PrintColor(result, Color::Green);
+                        println!("{}", Paint::green(result.clone()) );
+                        //PrintColor(result, Color::Green);
                     }
                     finded = true;
                 }
                 else 
                 {
-                    PrintColor("Hash not found in potfile".to_string(), Color::Red);
+                    println!("{}",Paint::red("Hash not found in potfile") );
+                    //PrintColor("Hash not found in potfile".to_string(), Color::Red);
                 }
 
                 println!("Time elapsed \t: {:.2}s", start.elapsed().expect("Fail to get time value").as_millis() as f64 / DEFAULT_SECOND_DIV as f64 );
@@ -219,11 +221,13 @@ fn TestHash(app : clap::App ) {
                         let mut result = format!("Hash found \t: \"{}\":{}",HashLine.clone(), ret);
                         if target.len() == 1 
                         {
-                            PrintColor(result, Color::Green);
+                            //PrintColor(result, Color::Green);
+                            println!("{}", Paint::green(result) );
                         } else 
                         {
                             result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),ret);
-                            PrintColor(result, Color::Green);
+                            println!("{}", Paint::green(result) );
+                            //PrintColor(result, Color::Green);
                         }
                         finded = true;
                     }
@@ -269,7 +273,8 @@ fn TestHash(app : clap::App ) {
                 }
                     if finded {
                         let result = format!("Hash found \t: \"{}\":{}", HashLine.clone(),valueHash.clone());
-                        PrintColor(result, Color::Green);
+                        println!("{}",Paint::green(result) );
+                        //PrintColor(result, Color::Green);
                         if !matches.is_present("DISABLE_POTFILE") {
                             AddToPotFile(HashLine.clone(),valueHash.clone(),"".to_string());
                         }
@@ -282,7 +287,8 @@ fn TestHash(app : clap::App ) {
 
 
                 if !finded {
-                    PrintColor("Hash not found".to_string(), Color::Red);
+                    println!("{}", Paint::red("Hash not found") )
+                    //PrintColor("Hash not found".to_string(), Color::Red);
                 }
                 if matches.is_present("COUNT") {
                     println!("Count \t\t: {}", count);
@@ -491,12 +497,12 @@ fn GetHardInfo() -> String {
 
 
 // MISC
-fn PrintColor(text : String, c : Color) {
-        let mut stdout = StandardStream::stdout(ColorChoice::Always);
-        stdout.set_color(ColorSpec::new().set_fg(Some(c)));
-        writeln!(&mut stdout,"{}",text);
-        stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
-}
+// fn PrintColor(text : String, c : Color) {
+//         let mut stdout = StandardStream::stdout(ColorChoice::Always);
+//         stdout.set_color(ColorSpec::new().set_fg(Some(c)));
+//         writeln!(&mut stdout,"{}",text);
+//         stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
+// }
 
 fn TargetIsFile(option : String) -> Vec<String> {
     let mut result : Vec<String> = Vec::new();
