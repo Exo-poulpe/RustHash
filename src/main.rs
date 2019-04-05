@@ -488,9 +488,8 @@ fn GetHardInfo() -> String {
     let info: hardware::SysInfo = hardware::SysInfo::new();
     let cpu = &info.cpu;
     let mem = &info.mem;
-    let os = &info.os;
-    let result = format!("CPU  \t\t: {}\nCPU cores \t: {}\nMemory   \t: {:.2} GB / {:.2} GB\nOS   \t\t: {}\nOS version \t: {}",cpu.brand,cpu.cores,
-     mem.free as f64 / MB,mem.total as f64 / MB,os.name,os.version);
+    let result = format!("CPU  \t\t: {}\nCPU cores \t: {}\nMemory   \t: {:.2} GB / {:.2} GB\n",cpu.brand,cpu.cores,
+     mem.free as f64 / MB,mem.total as f64 / MB);
     return result;
 }
 /////////////////////
@@ -533,7 +532,7 @@ fn TargetIsFile(option : String) -> Vec<String> {
 // OPTIONS parser
 fn Options<'a>() -> clap::App<'a, 'a> {
     let result = App::new("RustHash")
-                            .version("0.0.3.4")
+                            .version("0.0.3.5")
                             .author("Exo-poulpe")
                             .about("Rust hash test hash from wordlist")
                             .arg(Arg::with_name("FILE")

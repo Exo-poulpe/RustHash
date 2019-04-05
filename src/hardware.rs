@@ -1,7 +1,8 @@
 extern crate raw_cpuid;
-//extern crate sys_info; // Memory info + os info // Cpu info
+extern crate sysinfo; // Memory info + os info // Cpu info
 
 use raw_cpuid::CpuId;
+use sysinfo::{System, SystemExt,Process,ProcessExt};
 use std::convert::*;
 use std::string::String;
 
@@ -15,14 +16,9 @@ pub struct MEM {
     pub total: f32,
     pub free: f32,
 }
-pub struct OS {
-    pub name: String,
-    pub version: String,
-}
 pub struct SysInfo {
     pub cpu: CPU,
     pub mem: MEM,
-    pub os: OS,
 }
 impl SysInfo {
     pub fn new() -> SysInfo {
@@ -31,39 +27,30 @@ impl SysInfo {
         let Strcores = 1;//sys_info::cpu_num().unwrap();
         let tmp = cpuid.get_extended_function_info().unwrap();
         let Strbrand = tmp.processor_brand_string().unwrap();
-
+        let mut sys = System::new();
+        sys.refresh_all();
         // MEM
         //let mem = {total=12,free=21};//sys_info::mem_info().unwrap();
-
-        // OS
-        let os_name = "moi".to_string();//sys_info::os_type().unwrap();
-        let os_version = "21".to_string();// sys_info::os_release().unwrap();
 
         return SysInfo {
             cpu: CPU {
                 brand: String::from(Strbrand),
-                cores: (Strcores as i32),
+                cores: (sys.get_processor_list().len() as i32 - 1),
             },
             mem: MEM {
-                total: (12 as f32),
-                free: (11 as f32),
-            },
-            os: OS {
-                name: os_name,
-                version: os_version,
+                total: (sys.get_total_memory() as f32),
+                free: ((sys.get_total_memory() - sys.get_used_memory()) as f32),
             },
         };
     }
 
     pub fn to_string(&self) -> String {
         let tmp = format!(
-            "Processor {}\nProcessor cores : {}\nMemory : {:.2} GB / {:.2} GB\nOS : {} {}",
+            "Processor {}\nProcessor cores : {}\nMemory : {:.2} GB / {:.2} GB\n",
             self.cpu.brand,
             self.cpu.cores,
             self.mem.free / GB,
             self.mem.total / GB,
-            self.os.name,
-            self.os.version
         );
         return String::from(tmp);
     }

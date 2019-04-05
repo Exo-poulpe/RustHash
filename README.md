@@ -11,7 +11,7 @@ Download the Rust source and compile then.
 ## Usage/Help ##
 
 ```
-RustHash 0.0.3.4
+RustHash 0.0.3.5
 Exo-poulpe
 Rust hash test hash from wordlist
 
